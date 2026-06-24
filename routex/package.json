@@ -2,10 +2,8 @@
   "name": "routex",
   "version": "1.0.0",
   "engines": {
-  "node": "18.x"
-}
-  "description": "RouteX - Supply & Delivery Intelligence System",
-  "main": "backend/server.js", 
+    "node": "18.x"
+  },
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
