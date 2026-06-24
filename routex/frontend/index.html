@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RouteX - Supply Intelligence</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">Route<span>X</span></div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <a class="nav-item active" onclick="navigate('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </a>
+
+    <div class="nav-label" style="margin-top:0.8rem">Manage</div>
+    <a class="nav-item" onclick="navigate('clients')">
+      <span class="icon">👥</span> Clients
+    </a>
+    <a class="nav-item" onclick="navigate('orders')">
+      <span class="icon">📋</span> Orders
+    </a>
+    <a class="nav-item" onclick="navigate('deliveries')">
+      <span class="icon">🚛</span> Deliveries
+    </a>
+    <a class="nav-item" onclick="navigate('materials')">
+      <span class="icon">🏭</span> Raw Materials
+    </a>
+
+    <div class="nav-label" style="margin-top:0.8rem">Intelligence</div>
+    <a class="nav-item" onclick="navigate('route')">
+      <span class="icon">🗺️</span> Route Planner
+    </a>
+    <a class="nav-item" onclick="navigate('forecast')">
+      <span class="icon">🔮</span> Forecast
+    </a>
+    <a class="nav-item" onclick="navigate('analytics')">
+      <span class="icon">📈</span> Analytics
+    </a>
+  </nav>
+</aside>
+
+<div class="main">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <!-- <div class="topbar-right">
+      <input class="search-bar" id="global-search" placeholder="🔍  Search clients..." oninput="globalSearch(this.value)"/>
+    </div> -->
+  </header>
+
+  <!-- DASHBOARD PAGE -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats-grid" id="dashboard-stats">
+      <div class="loading"><span class="spinner"></span>Loading...</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🏆 Top Clients</div>
+        </div>
+        <div class="section-body" id="top-clients-list">
+          <div class="loading"><span class="spinner"></span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">💰 Revenue by Material</div>
+        </div>
+        <div class="section-body" id="revenue-chart">
+          <div class="loading"><span class="spinner"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">📍 Clients by City</div>
+      </div>
+      <div class="section-body" id="city-chart">
+        <div class="loading"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTS PAGE -->
+  <div class="page" id="page-clients">
+    <div class="section" style="margin-bottom:1.5rem">
+      <div class="section-header">
+        <div class="section-title">🔍 Filter Clients</div>
+      </div>
+      <div class="section-body">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label>City</label>
+            <select id="client-city">
+              <option value="">All Cities</option>
+              <option>Amritsar</option>
+              <option>Ludhiana</option>
+              <option>Chandigarh</option>
+              <option>Jalandhar</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Min Credit Score</label>
+            <input type="number" id="client-credit" placeholder="e.g. 70" min="0" max="100"/>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="client-active">
+              <option value="">All</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tag</label>
+            <select id="client-tag">
+              <option value="">Any</option>
+              <option>wholesale</option>
+              <option>retail</option>
+              <option>vip</option>
+              <option>priority</option>
+              <option>new</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="loadClients()">Apply Filter</button>
+          <button class="btn btn-secondary" onclick="clearClientFilter()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">👥 Clients <span id="client-count" style="color:var(--muted);font-weight:400;"></span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Client ID</th><th>Name</th><th>City</th>
+              <th>Credit Score</th><th>Total Orders</th>
+              <th>Tags</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="clients-table">
+            <tr><td colspan="7" class="loading"><span class="spinner"></span>Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDERS PAGE -->
+  <div class="page" id="page-orders">
+    <div class="section" style="margin-bottom:1.5rem">
+      <div class="section-header">
+        <div class="section-title">🔍 Filter Orders</div>
+      </div>
+      <div class="section-body">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="order-priority">
+              <option value="">All</option>
+              <option>high</option>
+              <option>medium</option>
+              <option>low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="order-status">
+              <option value="">All</option>
+              <option>pending</option>
+              <option>processing</option>
+              <option>delivered</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Min Amount (Rs)</label>
+            <input type="number" id="order-min" placeholder="e.g. 3000"/>
+          </div>
+          <button class="btn btn-primary" onclick="loadOrders()">Apply Filter</button>
+          <button class="btn btn-secondary" onclick="clearOrderFilter()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">📋 Orders <span id="order-count" style="color:var(--muted);font-weight:400;"></span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th><th>Client</th><th>Items</th>
+              <th>Amount</th><th>Priority</th><th>Status</th><th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="orders-table">
+            <tr><td colspan="7" class="loading"><span class="spinner"></span>Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERIES PAGE -->
+  <div class="page" id="page-deliveries">
+    <div class="section" style="margin-bottom:1.5rem">
+      <div class="section-header">
+        <div class="section-title">🔍 Filter Deliveries</div>
+      </div>
+      <div class="section-body">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label>Status</label>
+            <select id="del-status">
+              <option value="">All</option>
+              <option>pending</option>
+              <option>in-transit</option>
+              <option>delivered</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Driver Name</label>
+            <input type="text" id="del-driver" placeholder="e.g. Ravi Kumar"/>
+          </div>
+          <button class="btn btn-primary" onclick="loadDeliveries()">Apply Filter</button>
+          <button class="btn btn-secondary" onclick="clearDelFilter()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="deliveries-list">
+      <div class="loading"><span class="spinner"></span>Loading...</div>
+    </div>
+  </div>
+
+  <!-- MATERIALS PAGE -->
+  <div class="page" id="page-materials">
+    <div class="section" style="margin-bottom:1.5rem">
+      <div class="section-header">
+        <div class="section-title">🔍 Filter Materials</div>
+      </div>
+      <div class="section-body">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="mat-cat">
+              <option value="">All</option>
+              <option>Grain</option>
+              <option>Pulses</option>
+              <option>Spices</option>
+              <option>Commodity</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Max Price/Unit (Rs)</label>
+            <input type="number" id="mat-price" placeholder="e.g. 100"/>
+          </div>
+          <button class="btn btn-primary" onclick="loadMaterials()">Apply Filter</button>
+          <button class="btn btn-secondary" onclick="clearMatFilter()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">🏭 Raw Materials</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Category</th>
+              <th>Stock (kg)</th><th>Price/Unit</th><th>Warehouse</th><th>Top Supplier</th>
+            </tr>
+          </thead>
+          <tbody id="materials-table">
+            <tr><td colspan="7" class="loading"><span class="spinner"></span>Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUTE PLANNER PAGE -->
+  <div class="page" id="page-route">
+    <div class="grid-2" style="margin-bottom:1.5rem;">
+
+      <!-- Left: select clients + run -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🗺️ Plan Optimal Route</div>
+        </div>
+        <div class="section-body">
+          <p style="color:var(--muted);font-size:0.83rem;margin-bottom:1rem;">
+            Select clients to deliver to. RouteX will calculate the shortest path using the
+            <strong style="color:var(--accent2);">Nearest Neighbor algorithm</strong> —
+            always visiting the closest unvisited stop next.
+          </p>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label>Delivery Date</label>
+            <input type="date" id="route-date" style="max-width:180px;"/>
+          </div>
+          <div class="form-group" style="margin-bottom:1.2rem;">
+            <label>Select Clients to Visit</label>
+            <div id="client-checkboxes" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+              <div class="loading"><span class="spinner"></span>Loading clients...</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="runOptimization()" style="width:100%;">
+            ▶ Calculate Optimal Route
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: result summary -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📊 Optimization Result</div>
+        </div>
+        <div class="section-body" id="route-result">
+          <div class="empty-state">
+            <div class="icon">🗺️</div>
+            <div>Select clients and click Calculate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optimized route visual -->
+    <div class="section" id="route-visual-section" style="display:none;">
+      <div class="section-header">
+        <div class="section-title">🚛 Optimized Stop Order</div>
+        <span style="font-size:0.78rem;color:var(--muted);">Nearest neighbor — shortest path</span>
+      </div>
+      <div class="section-body" id="route-visual"></div>
+    </div>
+
+    <!-- Past optimized routes -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">📋 Past Optimized Deliveries</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Delivery ID</th><th>Stops</th><th>Optimized Km</th><th>Naive Km</th><th>Km Saved</th><th>% Saved</th><th>Status</th></tr>
+          </thead>
+          <tbody id="optimized-table">
+            <tr><td colspan="7" class="loading"><span class="spinner"></span>Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORECAST PAGE -->
+  <div class="page" id="page-forecast">
+    <div class="section" style="margin-bottom:1.5rem">
+      <div class="section-header">
+        <div class="section-title">🔮 Predicted Supply Demand — Next 3 Months</div>
+      </div>
+      <div class="section-body" style="color:var(--muted);font-size:0.85rem;">
+        Based on client supply history using aggregation pipeline: <code style="color:var(--accent2)">$unwind → $group → $addFields → $multiply</code>
+      </div>
+    </div>
+    <div class="grid-3" id="forecast-grid">
+      <div class="loading"><span class="spinner"></span>Loading forecasts...</div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS PAGE -->
+  <div class="page" id="page-analytics">
+    <div class="grid-2">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📍 Orders Joined with Clients</div>
+        </div>
+        <div class="section-body" style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem;">
+          Aggregation: <code style="color:var(--accent2)">$lookup + $unwind + $project</code>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Order</th><th>Client</th><th>City</th><th>Amount</th><th>Status</th></tr>
+            </thead>
+            <tbody id="joined-orders-table">
+              <tr><td colspan="5" class="loading"><span class="spinner"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">📦 Revenue by Material</div>
+        </div>
+        <div class="section-body" style="color:var(--muted);font-size:0.8rem;margin-bottom:1rem;">
+          Aggregation: <code style="color:var(--accent2)">$unwind + $group($sum, $avg) + $sort</code>
+        </div>
+        <div class="section-body" id="analytics-revenue">
+          <div class="loading"><span class="spinner"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script src="js/dashboard.js"></script>
+<script src="js/clients.js"></script>
+<script src="js/orders.js"></script>
+<script src="js/deliveries.js"></script>
+<script src="js/materials.js"></script>
+<script src="js/route.js"></script>
+<script>
+
+const pages   = { dashboard:true, clients:true, orders:true, deliveries:true, materials:true, forecast:true, analytics:true };
+const titles  = { dashboard:"Dashboard", clients:"Clients", orders:"Orders", deliveries:"Deliveries", materials:"Raw Materials", route:"Route Planner", forecast:"Supply Forecast", analytics:"Analytics" };
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(page)) n.classList.add('active');
+  });
+  document.getElementById('topbar-title').textContent = titles[page];
+
+  if (page === 'dashboard')   loadDashboard();
+  if (page === 'clients')     loadClients();
+  if (page === 'orders')      loadOrders();
+  if (page === 'deliveries')  loadDeliveries();
+  if (page === 'materials')   loadMaterials();
+  if (page === 'route')       loadRoutePlanner();
+  if (page === 'forecast')    loadForecast();
+  if (page === 'analytics')   loadAnalytics();
+}
+
+let searchTimeout;
+async function globalSearch(q) {
+  clearTimeout(searchTimeout);
+  if (!q.trim()) return;
+  searchTimeout = setTimeout(async () => {
+    const res = await fetch(`/api/clients/search?q=${encodeURIComponent(q)}`);
+    const json = await res.json();
+    navigate('clients');
+    renderClientsTable(json.data);
+    document.getElementById('client-count').textContent = `(${json.count} results)`;
+  }, 350);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+window.addEventListener('DOMContentLoaded', () => loadDashboard());
+</script>
+</body>
+</html>
